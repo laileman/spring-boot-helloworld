@@ -1,0 +1,100 @@
+# deployment: main
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: SpringHello-deploy1
+  labels:
+    name: SpringHellp-deploy
+    role: main
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: SpringHello-pod1
+    template:
+      metadata:
+        labels:
+          SpringHello-pod1
+      spec:
+        initContainers:
+        - name: getCodes
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: ['git','clone','https://github.com/laileman/spring-boot-helloworld','/workdir']
+          volumeMounts:
+          - name: workdir1
+            mountPath: /workdir1
+        containers:
+        - name: SpringHello-container1
+          images: java:1.7
+          imagePullPolicy: IfNotPresent
+          command: ['java','-jar','/workdir/spring-boot-hellword/src/main/java/de/ykoer/examples/hello/Application.java']
+          ports:
+          - containerPort: 8080
+            name: SpringHello-port1
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /ping
+            initianDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+          - name: workdir1
+            mountPath: /workdir1
+        volumes:
+        - name: workdir1
+          nfs:
+            path: /workdir1
+            server: x.x.x.x
+            
+---
+# deployment:backup
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: SpringHello-deploy2
+  labels:
+    name: SpringHellp-deploy
+    role: main
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: SpringHello-pod2
+    template:
+      metadata:
+        labels:
+          SpringHello-pod2
+      spec:
+        initContainers:
+        - name: getCodes
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: ['git','clone','https://github.com/laileman/spring-boot-helloworld','/workdir']
+          volumeMounts:
+          - name: workdir2
+            mountPath: /workdir2
+        containers:
+        - name: SpringHello-container1
+          images: java
+          imagePullPolicy: IfNotPresent
+          command: ['java','-jar','/workdir/spring-boot-hellword/src/main/java/de/ykoer/examples/hello/Application.java']
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /ping
+            initianDelaySeconds: 5
+            periodSeconds: 5
+          ports:
+          - containerPort: 8080
+            name: SpringHello-port1
+          volumeMounts:
+          - name: workdir2
+            mountPath: /workdir2
+        volumes:
+        - name: workdir2
+          nfs:
+            path: /workdir2
+            server: x.x.x.x
