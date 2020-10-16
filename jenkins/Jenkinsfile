@@ -1,0 +1,18 @@
+# Jenkinsfile
+
+## git repo: https://github.com/laileman/spring-boot-helloworld
+
+pipeline {
+    stages {
+        stage('create kubernetes deployments ') {
+            steps {
+                kubectl create -f  kubernetes/SpringHello-deploy.yaml
+            }
+        }
+        stage('create kubernetes service ) {
+            steps {
+                kubectl create -f  kubernetes/SpringHello-deploy.yaml
+            }
+        }
+    }
+}
